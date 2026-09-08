@@ -1,0 +1,1781 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Estacionamento Neo • Sistema Inteligente</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Inter:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0a0a12;
+            --surface: #12121f;
+            --surface2: #1a1a2e;
+            --border: #2a2a45;
+            --text: #e8e8f0;
+            --muted: #8888a8;
+            --cyan: #00f0ff;
+            --magenta: #ff00aa;
+            --lime: #b8ff00;
+            --orange: #ff6b00;
+            --red: #ff3355;
+            --green: #00ff9d;
+            --purple: #8b5cf6;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            background-image:
+                radial-gradient(ellipse at 20% 20%, rgba(0, 240, 255, 0.06) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 80%, rgba(255, 0, 170, 0.05) 0%, transparent 50%);
+        }
+
+        /* HEADER */
+        header {
+            background: linear-gradient(90deg, #0d0d18, #15152a);
+            border-bottom: 1px solid var(--border);
+            padding: 14px 28px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(12px);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-icon {
+            width: 42px;
+            height: 42px;
+            background: linear-gradient(135deg, var(--cyan), var(--magenta));
+            border-radius: 10px;
+            display: grid;
+            place-items: center;
+            font-size: 1.4rem;
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.3);
+        }
+
+        .logo h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.35rem;
+            letter-spacing: 1px;
+            background: linear-gradient(90deg, var(--cyan), var(--magenta));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .logo span {
+            font-size: 0.7rem;
+            color: var(--muted);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .header-stats {
+            display: flex;
+            gap: 24px;
+            font-size: 0.85rem;
+        }
+
+        .header-stats div {
+            text-align: right;
+        }
+
+        .header-stats strong {
+            color: var(--cyan);
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        /* LAYOUT */
+        .container {
+            max-width: 1500px;
+            margin: 0 auto;
+            padding: 24px;
+            display: grid;
+            grid-template-columns: 1fr 360px;
+            gap: 24px;
+        }
+
+        @media (max-width: 1100px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* CARDS RESUMO */
+        .resumo {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 14px;
+            margin-bottom: 22px;
+        }
+
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 16px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+
+        .card:hover {
+            transform: translateY(-3px);
+            border-color: var(--cyan);
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--accent, var(--cyan));
+        }
+
+        .card h3 {
+            font-size: 0.72rem;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 6px;
+        }
+
+        .card .valor {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.6rem;
+            font-weight: 700;
+        }
+
+        .card.cyan .valor {
+            color: var(--cyan);
+        }
+
+        .card.green .valor {
+            color: var(--green);
+        }
+
+        .card.red .valor {
+            color: var(--red);
+        }
+
+        .card.orange .valor {
+            color: var(--orange);
+        }
+
+        .card.magenta .valor {
+            color: var(--magenta);
+        }
+
+        .card.lime .valor {
+            color: var(--lime);
+        }
+
+        /* PAINEL PRINCIPAL */
+        .painel {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 20px;
+        }
+
+        .painel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 18px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .painel h2 {
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .filtros {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .filtro-btn {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            color: var(--muted);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.78rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .filtro-btn.active,
+        .filtro-btn:hover {
+            background: rgba(0, 240, 255, 0.15);
+            border-color: var(--cyan);
+            color: var(--cyan);
+        }
+
+        /* ANDARES */
+        .andares {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .andar-btn {
+            flex: 1;
+            padding: 10px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--muted);
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .andar-btn.active {
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.2), rgba(255, 0, 170, 0.15));
+            border-color: var(--cyan);
+            color: var(--cyan);
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.15);
+        }
+
+        /* GRID VAGAS */
+        .grid-vagas {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(105px, 1fr));
+            gap: 10px;
+        }
+
+        .vaga {
+            height: 120px;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.25s;
+            position: relative;
+            border: 2px solid transparent;
+            padding: 6px;
+            text-align: center;
+            font-size: 0.85rem;
+        }
+
+        .vaga.livre {
+            background: linear-gradient(145deg, #0a2a1a, #0d3320);
+            border-color: #1a5c35;
+        }
+
+        .vaga.ocupada {
+            background: linear-gradient(145deg, #2a0a15, #3a0f1f);
+            border-color: #6b1a30;
+        }
+
+        .vaga.pcd {
+            border-style: dashed;
+        }
+
+        .vaga.moto {
+            height: 90px;
+        }
+
+        .vaga:hover {
+            transform: translateY(-4px) scale(1.03);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+        }
+
+        .vaga.livre:hover {
+            border-color: var(--green);
+            box-shadow: 0 0 20px rgba(0, 255, 157, 0.2);
+        }
+
+        .vaga.ocupada:hover {
+            border-color: var(--red);
+        }
+
+        .vaga .icone {
+            font-size: 1.6rem;
+            margin-bottom: 2px;
+        }
+
+        .vaga .numero {
+            font-weight: 700;
+            font-size: 0.9rem;
+            letter-spacing: 0.5px;
+        }
+
+        .vaga .placa {
+            font-size: 0.7rem;
+            background: rgba(0, 0, 0, 0.4);
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-top: 3px;
+            font-family: 'Orbitron', monospace;
+            letter-spacing: 1px;
+        }
+
+        .vaga .tempo {
+            font-size: 0.65rem;
+            color: var(--orange);
+            margin-top: 2px;
+        }
+
+        .vaga .badge {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            font-size: 0.6rem;
+            background: var(--purple);
+            color: white;
+            padding: 1px 5px;
+            border-radius: 4px;
+        }
+
+        /* SIDEBAR */
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+        .box {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 18px;
+        }
+
+        .box h3 {
+            font-size: 0.95rem;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--cyan);
+        }
+
+        .form-group {
+            margin-bottom: 14px;
+        }
+
+        label {
+            display: block;
+            font-size: 0.78rem;
+            color: var(--muted);
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 11px 13px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: var(--bg);
+            color: var(--text);
+            font-size: 0.95rem;
+            outline: none;
+            transition: border 0.2s, box-shadow 0.2s;
+        }
+
+        input:focus,
+        select:focus {
+            border-color: var(--cyan);
+            box-shadow: 0 0 0 3px rgba(0, 240, 255, 0.15);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(90deg, #00c8d6, #8b5cf6);
+            color: white;
+            box-shadow: 0 4px 15px rgba(0, 200, 214, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 200, 214, 0.4);
+        }
+
+        .btn-danger {
+            background: linear-gradient(90deg, #ff3355, #ff6b00);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: var(--surface2);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--cyan);
+            color: var(--cyan);
+        }
+
+        .btn-warning {
+            background: linear-gradient(90deg, #f59e0b, #d97706);
+            color: white;
+        }
+
+        /* BUSCA */
+        .busca-resultado {
+            margin-top: 12px;
+            padding: 12px;
+            border-radius: 10px;
+            font-size: 0.85rem;
+            display: none;
+        }
+
+        .busca-resultado.ok {
+            background: rgba(0, 255, 157, 0.1);
+            border: 1px solid var(--green);
+            color: var(--green);
+            display: block;
+        }
+
+        .busca-resultado.fail {
+            background: rgba(255, 51, 85, 0.1);
+            border: 1px solid var(--red);
+            color: var(--red);
+            display: block;
+        }
+
+        /* TABELA */
+        .movimentacao {
+            margin-top: 22px;
+        }
+
+        .tabela-wrapper {
+            overflow-x: auto;
+            max-height: 280px;
+            overflow-y: auto;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+
+        th {
+            background: var(--surface2);
+            padding: 10px 12px;
+            text-align: left;
+            color: var(--muted);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.7rem;
+            letter-spacing: 0.5px;
+            position: sticky;
+            top: 0;
+        }
+
+        td {
+            padding: 10px 12px;
+            border-top: 1px solid var(--border);
+        }
+
+        tr:hover td {
+            background: rgba(0, 240, 255, 0.03);
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-size: 0.72rem;
+            font-weight: 600;
+        }
+
+        .tag.entrada {
+            background: rgba(0, 255, 157, 0.15);
+            color: var(--green);
+        }
+
+        .tag.saida {
+            background: rgba(255, 51, 85, 0.15);
+            color: var(--red);
+        }
+
+        /* LEGENDA */
+        .legenda {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-top: 14px;
+            font-size: 0.78rem;
+            color: var(--muted);
+        }
+
+        .legenda span {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 3px;
+        }
+
+        .dot.livre {
+            background: #1a5c35;
+        }
+
+        .dot.ocupada {
+            background: #6b1a30;
+        }
+
+        .dot.pcd {
+            border: 1.5px dashed #8b5cf6;
+            background: transparent;
+        }
+
+        /* TOAST */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: var(--surface2);
+            border: 1px solid var(--cyan);
+            color: var(--text);
+            padding: 14px 20px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s;
+            z-index: 999;
+            max-width: 320px;
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        /* PREÇOS */
+        .precos {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            font-size: 0.8rem;
+        }
+
+        .precos div {
+            background: var(--bg);
+            padding: 8px;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid var(--border);
+        }
+
+        .precos strong {
+            color: var(--cyan);
+            display: block;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: var(--muted);
+            font-size: 0.75rem;
+        }
+
+        /* SCROLLBAR */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--cyan);
+        }
+
+        /* ===== MODAL PAGAMENTO ===== */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(6px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 20px;
+        }
+
+        .modal-overlay.show {
+            display: flex;
+        }
+
+        .modal {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            width: 100%;
+            max-width: 420px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6);
+            animation: modalIn 0.3s ease;
+        }
+
+        @keyframes modalIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px) scale(0.96);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .modal-header {
+            padding: 18px 22px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 {
+            font-size: 1.15rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--muted);
+            font-size: 1.4rem;
+            cursor: pointer;
+            line-height: 1;
+        }
+
+        .modal-close:hover {
+            color: var(--red);
+        }
+
+        .modal-body {
+            padding: 20px 22px;
+        }
+
+        .pagamento-resumo {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 14px;
+            margin-bottom: 18px;
+            font-size: 0.9rem;
+        }
+
+        .pagamento-resumo .linha {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 6px;
+        }
+
+        .pagamento-resumo .total {
+            border-top: 1px solid var(--border);
+            margin-top: 10px;
+            padding-top: 10px;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--cyan);
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        .metodos {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 18px;
+        }
+
+        .metodo {
+            background: var(--surface2);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 12px 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.8rem;
+        }
+
+        .metodo:hover,
+        .metodo.active {
+            border-color: var(--cyan);
+            background: rgba(0, 240, 255, 0.08);
+            box-shadow: 0 0 12px rgba(0, 240, 255, 0.15);
+        }
+
+        .metodo .icone {
+            font-size: 1.6rem;
+            margin-bottom: 4px;
+        }
+
+        .form-cartao {
+            display: none;
+        }
+
+        .form-cartao.show {
+            display: block;
+        }
+
+        .form-pix {
+            display: none;
+            text-align: center;
+        }
+
+        .form-pix.show {
+            display: block;
+        }
+
+        .pix-qr {
+            width: 160px;
+            height: 160px;
+            margin: 12px auto;
+            background: white;
+            border-radius: 12px;
+            display: grid;
+            place-items: center;
+            font-size: 4rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .pix-qr::after {
+            content: '';
+            position: absolute;
+            inset: 8px;
+            border: 3px solid #000;
+            border-radius: 6px;
+            background:
+                linear-gradient(#000 20%, transparent 20%) 0 0 / 12px 12px,
+                linear-gradient(90deg, #000 20%, transparent 20%) 0 0 / 12px 12px;
+            opacity: 0.15;
+        }
+
+        .pix-codigo {
+            font-family: monospace;
+            font-size: 0.7rem;
+            background: var(--bg);
+            padding: 8px;
+            border-radius: 8px;
+            word-break: break-all;
+            margin: 10px 0;
+            color: var(--muted);
+            border: 1px solid var(--border);
+        }
+
+        .row-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .status-pagamento {
+            text-align: center;
+            padding: 30px 10px;
+            display: none;
+        }
+
+        .status-pagamento.show {
+            display: block;
+        }
+
+        .status-pagamento .spinner {
+            width: 48px;
+            height: 48px;
+            border: 3px solid var(--border);
+            border-top-color: var(--cyan);
+            border-radius: 50%;
+            margin: 0 auto 16px;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .status-pagamento.sucesso .icone-status {
+            font-size: 3.5rem;
+            color: var(--green);
+        }
+
+        .status-pagamento.erro .icone-status {
+            font-size: 3.5rem;
+            color: var(--red);
+        }
+
+        .badge-pago {
+            display: inline-block;
+            background: rgba(0, 255, 157, 0.15);
+            color: var(--green);
+            font-size: 0.7rem;
+            padding: 2px 7px;
+            border-radius: 5px;
+            margin-left: 4px;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="logo">
+            <div class="logo-icon">🅿️</div>
+            <div>
+                <h1>ESTACIONAMENTO NEO</h1>
+                <span>Sistema Inteligente v2.0</span>
+            </div>
+        </div>
+        <div class="header-stats">
+            <div>Vagas livres<br><strong id="headerLivres">0</strong></div>
+            <div>Receita hoje<br><strong id="headerReceita">R$ 0</strong></div>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- COLUNA PRINCIPAL -->
+        <div>
+            <!-- RESUMO -->
+            <div class="resumo">
+                <div class="card cyan">
+                    <h3>Total Vagas</h3>
+                    <div class="valor" id="totalVagas">30</div>
+                </div>
+                <div class="card green">
+                    <h3>Livres</h3>
+                    <div class="valor" id="vagasLivres">0</div>
+                </div>
+                <div class="card red">
+                    <h3>Ocupadas</h3>
+                    <div class="valor" id="vagasOcupadas">0</div>
+                </div>
+                <div class="card orange">
+                    <h3>Entradas</h3>
+                    <div class="valor" id="entradasHoje">0</div>
+                </div>
+                <div class="card magenta">
+                    <h3>Saídas</h3>
+                    <div class="valor" id="saidasHoje">0</div>
+                </div>
+                <div class="card lime">
+                    <h3>Receita</h3>
+                    <div class="valor" id="receita">R$ 0</div>
+                </div>
+            </div>
+
+            <!-- MAPA DE VAGAS -->
+            <div class="painel">
+                <div class="painel-header">
+                    <h2>📍 Mapa de Vagas</h2>
+                    <div class="filtros">
+                        <button class="filtro-btn active" data-filtro="todos">Todos</button>
+                        <button class="filtro-btn" data-filtro="livre">Livres</button>
+                        <button class="filtro-btn" data-filtro="ocupada">Ocupadas</button>
+                        <button class="filtro-btn" data-filtro="pcd">PCD</button>
+                        <button class="filtro-btn" data-filtro="moto">Motos</button>
+                    </div>
+                </div>
+
+                <div class="andares">
+                    <button class="andar-btn active" data-andar="1">Andar 1 • Térreo</button>
+                    <button class="andar-btn" data-andar="2">Andar 2 • Superior</button>
+                </div>
+
+                <div class="grid-vagas" id="gridVagas"></div>
+
+                <div class="legenda">
+                    <span>
+                        <div class="dot livre"></div> Livre
+                    </span>
+                    <span>
+                        <div class="dot ocupada"></div> Ocupada
+                    </span>
+                    <span>
+                        <div class="dot pcd"></div> Preferencial (PCD)
+                    </span>
+                    <span>🏍️ Moto &nbsp; 🚗 Carro &nbsp; 🚙 SUV &nbsp; ♿ PCD</span>
+                </div>
+            </div>
+
+            <!-- MOVIMENTAÇÃO -->
+            <div class="painel movimentacao">
+                <h2 style="margin-bottom:14px">📋 Movimentação do Dia</h2>
+                <div class="tabela-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Horário</th>
+                                <th>Tipo</th>
+                                <th>Vaga</th>
+                                <th>Placa</th>
+                                <th>Veículo</th>
+                                <th>Tempo</th>
+                                <th>Valor</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabelaBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- SIDEBAR -->
+        <div class="sidebar">
+            <!-- BUSCA -->
+            <div class="box">
+                <h3>🔍 Busca Rápida</h3>
+                <div class="form-group">
+                    <label>Placa do veículo</label>
+                    <input type="text" id="buscaPlaca" placeholder="ABC1D23" maxlength="7"
+                        style="text-transform:uppercase">
+                </div>
+                <button class="btn btn-warning" onclick="buscarPlaca()">Buscar Placa</button>
+                <div class="busca-resultado" id="buscaResultado"></div>
+            </div>
+
+            <!-- ESTACIONAR -->
+            <div class="box">
+                <h3>🚗 Estacionar Veículo</h3>
+                <div class="form-group">
+                    <label>Vaga</label>
+                    <select id="selectVaga"></select>
+                </div>
+                <div class="form-group">
+                    <label>Placa</label>
+                    <input type="text" id="placa" placeholder="ABC1D23" maxlength="7" style="text-transform:uppercase">
+                </div>
+                <div class="form-group">
+                    <label>Tipo de Veículo</label>
+                    <select id="tipoVeiculo">
+                        <option value="Carro">🚗 Carro</option>
+                        <option value="Moto">🏍️ Moto</option>
+                        <option value="SUV">🚙 SUV</option>
+                        <option value="Caminhonete">🛻 Caminhonete</option>
+                        <option value="Van">🚐 Van</option>
+                    </select>
+                </div>
+                <button class="btn btn-primary" onclick="estacionar()">Estacionar Veículo</button>
+                <button class="btn btn-secondary" onclick="limparForm()">Limpar</button>
+            </div>
+
+            <!-- PREÇOS -->
+            <div class="box">
+                <h3>💰 Tabela de Preços</h3>
+                <div class="precos">
+                    <div><strong>R$ 8/h</strong>Carro</div>
+                    <div><strong>R$ 4/h</strong>Moto</div>
+                    <div><strong>R$ 12/h</strong>SUV / Van</div>
+                    <div><strong>R$ 15/h</strong>Caminhonete</div>
+                </div>
+                <p style="font-size:0.72rem;color:var(--muted);margin-top:10px;text-align:center">
+                    Tolerância: 15 min grátis • Cobrança mínima 1h
+                </p>
+            </div>
+
+            <!-- AÇÕES -->
+            <div class="box">
+                <h3>⚡ Ações Rápidas</h3>
+                <button class="btn btn-secondary" onclick="simularOcupacao()">🎲 Simular Ocupação</button>
+                <button class="btn btn-danger" onclick="liberarTodas()">Liberar Todas as Vagas</button>
+                <button class="btn btn-secondary" onclick="exportarRelatorio()">📄 Exportar Relatório</button>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        Estacionamento Neo • Sistema Inteligente • Feito com 💜 • Dados salvos localmente
+    </footer>
+
+    <div class="toast" id="toast"></div>
+
+    <!-- MODAL DE PAGAMENTO -->
+    <div class="modal-overlay" id="modalPagamento">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>💳 Pagamento</h2>
+                <button class="modal-close" onclick="fecharModalPagamento()">×</button>
+            </div>
+            <div class="modal-body">
+                <!-- Resumo -->
+                <div class="pagamento-resumo" id="pagamentoResumo">
+                    <div class="linha"><span>Vaga</span><strong id="payVaga">—</strong></div>
+                    <div class="linha"><span>Placa</span><strong id="payPlaca">—</strong></div>
+                    <div class="linha"><span>Veículo</span><strong id="payVeiculo">—</strong></div>
+                    <div class="linha"><span>Tempo</span><strong id="payTempo">—</strong></div>
+                    <div class="linha total"><span>Total</span><strong id="payTotal">R$ 0</strong></div>
+                </div>
+
+                <!-- Conteúdo principal (métodos + forms) -->
+                <div id="pagamentoConteudo">
+                    <p style="font-size:0.85rem;color:var(--muted);margin-bottom:12px">Escolha a forma de pagamento:</p>
+                    <div class="metodos">
+                        <div class="metodo active" data-metodo="pix" onclick="selecionarMetodo('pix')">
+                            <div class="icone">📱</div>
+                            PIX
+                        </div>
+                        <div class="metodo" data-metodo="credito" onclick="selecionarMetodo('credito')">
+                            <div class="icone">💳</div>
+                            Crédito
+                        </div>
+                        <div class="metodo" data-metodo="debito" onclick="selecionarMetodo('debito')">
+                            <div class="icone">🏦</div>
+                            Débito
+                        </div>
+                    </div>
+
+                    <!-- PIX -->
+                    <div class="form-pix show" id="formPix">
+                        <div class="pix-qr">⬛</div>
+                        <p style="font-size:0.8rem;color:var(--muted)">Escaneie o QR Code ou copie o código</p>
+                        <div class="pix-codigo" id="pixCodigo">
+                            00020126580014br.gov.bcb.pix0136estacionamento-neo@demo.com520400005303986540510.005802BR5925ESTACIONAMENTO
+                            NEO6009SAO PAULO62070503***6304ABCD</div>
+                        <button class="btn btn-secondary" onclick="copiarPix()" style="margin-bottom:8px">📋 Copiar
+                            código PIX</button>
+                        <button class="btn btn-primary" onclick="processarPagamento('pix')">Já paguei —
+                            Confirmar</button>
+                    </div>
+
+                    <!-- Cartão -->
+                    <div class="form-cartao" id="formCartao">
+                        <div class="form-group">
+                            <label>Número do cartão</label>
+                            <input type="text" id="cardNumber" placeholder="ACCT-000003" maxlength="19">
+                        </div>
+                        <div class="form-group">
+                            <label>Nome no cartão</label>
+                            <input type="text" id="cardName" placeholder="NOME COMPLETO">
+                        </div>
+                        <div class="row-2">
+                            <div class="form-group">
+                                <label>Validade</label>
+                                <input type="text" id="cardExpiry" placeholder="MM/AA" maxlength="5">
+                            </div>
+                            <div class="form-group">
+                                <label>CVV</label>
+                                <input type="text" id="cardCvv" placeholder="123" maxlength="4">
+                            </div>
+                        </div>
+                        <button class="btn btn-primary" id="btnPagarCartao" onclick="processarPagamento('cartao')">Pagar
+                            agora</button>
+                    </div>
+                </div>
+
+                <!-- Status (loading / sucesso / erro) -->
+                <div class="status-pagamento" id="statusPagamento">
+                    <div class="spinner" id="statusSpinner"></div>
+                    <div class="icone-status" id="statusIcone"></div>
+                    <h3 id="statusTitulo" style="margin:10px 0 6px"></h3>
+                    <p id="statusMsg" style="font-size:0.9rem;color:var(--muted)"></p>
+                    <button class="btn btn-primary" id="statusBtn" style="margin-top:16px;display:none"
+                        onclick="fecharModalPagamento()"></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ===== CONFIGURAÇÃO =====
+        const PRECOS = {
+            'Carro': 8,
+            'Moto': 4,
+            'SUV': 12,
+            'Van': 12,
+            'Caminhonete': 15
+        };
+        const TOLERANCIA_MIN = 15; // minutos grátis
+        const VAGAS_POR_ANDAR = 15;
+
+        // ===== ESTADO =====
+        let vagas = [];
+        let movimentacao = [];
+        let entradasHoje = 0;
+        let saidasHoje = 0;
+        let receita = 0;
+        let andarAtual = 1;
+        let filtroAtual = 'todos';
+
+        // ===== INICIALIZAÇÃO =====
+        function iniciar() {
+            // Tenta carregar do localStorage
+            const salvos = localStorage.getItem('estacionamentoNeo');
+            if (salvos) {
+                const data = JSON.parse(salvos);
+                vagas = data.vagas;
+                movimentacao = data.movimentacao || [];
+                entradasHoje = data.entradasHoje || 0;
+                saidasHoje = data.saidasHoje || 0;
+                receita = data.receita || 0;
+                // Converte strings de data de volta
+                vagas.forEach(v => {
+                    if (v.horarioEntrada) v.horarioEntrada = new Date(v.horarioEntrada);
+                });
+            } else {
+                // Cria 30 vagas (15 por andar)
+                for (let i = 1; i <= 30; i++) {
+                    const andar = i <= 15 ? 1 : 2;
+                    const numLocal = i <= 15 ? i : i - 15;
+                    vagas.push({
+                        id: i,
+                        numero: `${andar}${String(numLocal).padStart(2, '0')}`,
+                        andar: andar,
+                        ocupada: false,
+                        placa: null,
+                        tipo: null,
+                        horarioEntrada: null,
+                        pcd: [3, 8, 18, 23].includes(i), // algumas preferenciais
+                        motoOnly: [12, 13, 14, 27, 28, 29].includes(i)
+                    });
+                }
+            }
+
+            // Eventos
+            document.getElementById('buscaPlaca').addEventListener('keypress', e => {
+                if (e.key === 'Enter') buscarPlaca();
+            });
+
+            document.querySelectorAll('.andar-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.andar-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    andarAtual = parseInt(btn.dataset.andar);
+                    renderizarVagas();
+                });
+            });
+
+            document.querySelectorAll('.filtro-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.filtro-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    filtroAtual = btn.dataset.filtro;
+                    renderizarVagas();
+                });
+            });
+
+            // Atualiza tempo a cada 30s
+            setInterval(() => {
+                if (vagas.some(v => v.ocupada)) renderizarVagas();
+            }, 30000);
+
+            renderizar();
+        }
+
+        // ===== RENDER =====
+        function renderizar() {
+            renderizarVagas();
+            renderizarSelect();
+            renderizarResumo();
+            renderizarTabela();
+            salvar();
+        }
+
+        function renderizarVagas() {
+            const grid = document.getElementById('gridVagas');
+            grid.innerHTML = '';
+
+            const filtradas = vagas.filter(v => {
+                if (v.andar !== andarAtual) return false;
+                if (filtroAtual === 'livre' && v.ocupada) return false;
+                if (filtroAtual === 'ocupada' && !v.ocupada) return false;
+                if (filtroAtual === 'pcd' && !v.pcd) return false;
+                if (filtroAtual === 'moto' && !v.motoOnly) return false;
+                return true;
+            });
+
+            filtradas.forEach(vaga => {
+                const div = document.createElement('div');
+                let classes = `vaga ${vaga.ocupada ? 'ocupada' : 'livre'}`;
+                if (vaga.pcd) classes += ' pcd';
+                if (vaga.motoOnly) classes += ' moto';
+                div.className = classes;
+                div.onclick = () => clicarVaga(vaga);
+
+                let icone = '⬜';
+                if (vaga.ocupada) {
+                    icone = iconeVeiculo(vaga.tipo);
+                } else if (vaga.pcd) {
+                    icone = '♿';
+                } else if (vaga.motoOnly) {
+                    icone = '🏍️';
+                } else {
+                    icone = '🅿️';
+                }
+
+                let tempoHtml = '';
+                if (vaga.ocupada && vaga.horarioEntrada) {
+                    const min = Math.floor((Date.now() - new Date(vaga.horarioEntrada)) / 60000);
+                    tempoHtml = `<div class="tempo">${formatarTempo(min)}</div>`;
+                }
+
+                div.innerHTML = `
+                    ${vaga.pcd ? '<span class="badge">PCD</span>' : ''}
+                    <div class="icone">${icone}</div>
+                    <div class="numero">${vaga.numero}</div>
+                    ${vaga.ocupada ? `<div class="placa">${vaga.placa}</div>` : ''}
+                    ${tempoHtml}
+                `;
+                grid.appendChild(div);
+            });
+        }
+
+        function renderizarSelect() {
+            const select = document.getElementById('selectVaga');
+            const livres = vagas.filter(v => !v.ocupada);
+            select.innerHTML = livres.length
+                ? livres.map(v => `<option value="${v.id}">Vaga ${v.numero}${v.pcd ? ' (PCD)' : ''}${v.motoOnly ? ' (Moto)' : ''}</option>`).join('')
+                : '<option value="">Nenhuma vaga livre</option>';
+        }
+
+        function renderizarResumo() {
+            const livres = vagas.filter(v => !v.ocupada).length;
+            const ocupadas = vagas.length - livres;
+
+            document.getElementById('totalVagas').textContent = vagas.length;
+            document.getElementById('vagasLivres').textContent = livres;
+            document.getElementById('vagasOcupadas').textContent = ocupadas;
+            document.getElementById('entradasHoje').textContent = entradasHoje;
+            document.getElementById('saidasHoje').textContent = saidasHoje;
+            document.getElementById('receita').textContent = `R$ ${receita.toFixed(0)}`;
+            document.getElementById('headerLivres').textContent = livres;
+            document.getElementById('headerReceita').textContent = `R$ ${receita.toFixed(0)}`;
+        }
+
+        function renderizarTabela() {
+            const tbody = document.getElementById('tabelaBody');
+            if (!movimentacao.length) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--muted)">Nenhuma movimentação ainda</td></tr>';
+                return;
+            }
+            tbody.innerHTML = movimentacao.slice(0, 50).map(m => {
+                let valorHtml = '—';
+                if (m.valor > 0) {
+                    valorHtml = `R$ ${m.valor.toFixed(0)}`;
+                    if (m.pagamentoId) {
+                        valorHtml += ` <span class="badge-pago" title="${m.pagamentoId}">pago</span>`;
+                    }
+                }
+                return `
+                <tr>
+                    <td>${m.horario}</td>
+                    <td><span class="tag ${m.tipo}">${m.tipo.toUpperCase()}</span></td>
+                    <td>${m.vaga}</td>
+                    <td style="font-family:Orbitron,monospace">${m.placa}</td>
+                    <td>${iconeVeiculo(m.veiculo)} ${m.veiculo}</td>
+                    <td>${m.tempo || '—'}</td>
+                    <td>${valorHtml}</td>
+                </tr>`;
+            }).join('');
+        }
+
+        // ===== AÇÕES =====
+        function estacionar() {
+            const vagaId = parseInt(document.getElementById('selectVaga').value);
+            const placa = document.getElementById('placa').value.trim().toUpperCase();
+            const tipo = document.getElementById('tipoVeiculo').value;
+
+            if (!vagaId) return toast('Nenhuma vaga disponível!', true);
+            if (!placa || placa.length < 7) return toast('Informe uma placa válida (7 caracteres)', true);
+
+            // Verifica se placa já está estacionada
+            if (vagas.some(v => v.ocupada && v.placa === placa)) {
+                return toast('Esta placa já está estacionada!', true);
+            }
+
+            const vaga = vagas.find(v => v.id === vagaId);
+            if (!vaga || vaga.ocupada) return toast('Vaga inválida ou ocupada', true);
+
+            // Validação moto
+            if (vaga.motoOnly && tipo !== 'Moto') {
+                return toast('Esta vaga é exclusiva para motos!', true);
+            }
+
+            vaga.ocupada = true;
+            vaga.placa = placa;
+            vaga.tipo = tipo;
+            vaga.horarioEntrada = new Date();
+
+            entradasHoje++;
+            movimentacao.unshift({
+                horario: formatarHora(new Date()),
+                tipo: 'entrada',
+                vaga: vaga.numero,
+                placa: placa,
+                veiculo: tipo,
+                tempo: null,
+                valor: 0
+            });
+
+            limparForm();
+            renderizar();
+            toast(`Veículo ${placa} estacionado na vaga ${vaga.numero}`);
+        }
+
+        // Estado do pagamento atual
+        let pagamentoAtual = null;
+
+        function clicarVaga(vaga) {
+            if (!vaga.ocupada) {
+                document.getElementById('selectVaga').value = vaga.id;
+                document.getElementById('placa').focus();
+                return;
+            }
+
+            // Abre modal de pagamento
+            abrirModalPagamento(vaga);
+        }
+
+        function abrirModalPagamento(vaga) {
+            const min = Math.floor((Date.now() - new Date(vaga.horarioEntrada)) / 60000);
+            const valor = calcularPreco(vaga.tipo, min);
+
+            pagamentoAtual = {
+                vaga: vaga,
+                minutos: min,
+                valor: valor,
+                metodo: 'pix'
+            };
+
+            document.getElementById('payVaga').textContent = vaga.numero;
+            document.getElementById('payPlaca').textContent = vaga.placa;
+            document.getElementById('payVeiculo').textContent = `${iconeVeiculo(vaga.tipo)} ${vaga.tipo}`;
+            document.getElementById('payTempo').textContent = formatarTempo(min);
+            document.getElementById('payTotal').textContent = `R$ ${valor.toFixed(2)}`;
+
+            // Atualiza código PIX com valor
+            const pixCode = gerarCodigoPix(valor, vaga.placa);
+            document.getElementById('pixCodigo').textContent = pixCode;
+
+            // Reset UI
+            document.getElementById('pagamentoConteudo').style.display = 'block';
+            document.getElementById('statusPagamento').classList.remove('show', 'sucesso', 'erro');
+            document.getElementById('statusSpinner').style.display = 'block';
+            document.getElementById('statusIcone').textContent = '';
+            document.getElementById('statusBtn').style.display = 'none';
+            selecionarMetodo('pix');
+
+            document.getElementById('modalPagamento').classList.add('show');
+        }
+
+        function fecharModalPagamento() {
+            document.getElementById('modalPagamento').classList.remove('show');
+            pagamentoAtual = null;
+        }
+
+        function selecionarMetodo(metodo) {
+            if (!pagamentoAtual) return;
+            pagamentoAtual.metodo = metodo;
+
+            document.querySelectorAll('.metodo').forEach(m => {
+                m.classList.toggle('active', m.dataset.metodo === metodo);
+            });
+
+            const isPix = metodo === 'pix';
+            document.getElementById('formPix').classList.toggle('show', isPix);
+            document.getElementById('formCartao').classList.toggle('show', !isPix);
+
+            if (!isPix) {
+                document.getElementById('btnPagarCartao').textContent =
+                    metodo === 'credito' ? 'Pagar no Crédito' : 'Pagar no Débito';
+            }
+        }
+
+        function copiarPix() {
+            const codigo = document.getElementById('pixCodigo').textContent;
+            navigator.clipboard.writeText(codigo).then(() => {
+                toast('Código PIX copiado!');
+            }).catch(() => {
+                toast('Não foi possível copiar', true);
+            });
+        }
+
+        function gerarCodigoPix(valor, placa) {
+            // Simulação de payload PIX (EMV) — em produção use a API real
+            const valorStr = valor.toFixed(2);
+            return `00020126580014br.gov.bcb.pix0136neo-${placa.toLowerCase()}@estacionamento.demo52040000530398654${valorStr.length.toString().padStart(2, '0')}${valorStr}5802BR5925ESTACIONAMENTO NEO6009SAO PAULO62070503***6304${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
+        }
+
+        /**
+         * API de Pagamento (simulada)
+         * Em produção: substitua por chamada real ao Mercado Pago / Stripe / PagSeguro
+         *
+         * Exemplo Mercado Pago (backend):
+         *   POST https://api.mercadopago.com/v1/payments
+         *   Headers: Authorization: Bearer ACCESS_TOKEN
+         *   Body: { transaction_amount, token, description, payment_method_id, payer: { email } }
+         */
+        async function apiPagamento(dados) {
+            // Simula latência de rede
+            await new Promise(r => setTimeout(r, 1800 + Math.random() * 1200));
+
+            // Simula ~8% de falha (cartão recusado, etc.)
+            if (Math.random() < 0.08) {
+                throw new Error('Pagamento recusado pela operadora. Tente outro cartão ou método.');
+            }
+
+            // Resposta no formato similar ao Mercado Pago
+            return {
+                id: 'pay_' + Date.now() + '_' + Math.random().toString(36).substring(2, 8),
+                status: 'approved',
+                status_detail: 'accredited',
+                transaction_amount: dados.valor,
+                payment_method_id: dados.metodo,
+                date_approved: new Date().toISOString(),
+                description: `Estacionamento - Vaga ${dados.vaga} - ${dados.placa}`,
+                external_reference: dados.placa
+            };
+        }
+
+        async function processarPagamento(tipo) {
+            if (!pagamentoAtual) return;
+
+            const { vaga, minutos, valor, metodo } = pagamentoAtual;
+
+            // Validação básica do cartão (se for cartão)
+            if (tipo === 'cartao') {
+                const num = document.getElementById('cardNumber').value.replace(/\s/g, '');
+                const nome = document.getElementById('cardName').value.trim();
+                const exp = document.getElementById('cardExpiry').value;
+                const cvv = document.getElementById('cardCvv').value;
+
+                if (num.length < 13 || !nome || exp.length < 4 || cvv.length < 3) {
+                    return toast('Preencha todos os dados do cartão', true);
+                }
+            }
+
+            // Valor zero = libera sem pagamento
+            if (valor <= 0) {
+                finalizarSaida(vaga, minutos, 0, null);
+                fecharModalPagamento();
+                toast('Saída liberada (dentro da tolerância)');
+                return;
+            }
+
+            // Mostra loading
+            document.getElementById('pagamentoConteudo').style.display = 'none';
+            const statusEl = document.getElementById('statusPagamento');
+            statusEl.classList.add('show');
+            statusEl.classList.remove('sucesso', 'erro');
+            document.getElementById('statusSpinner').style.display = 'block';
+            document.getElementById('statusIcone').textContent = '';
+            document.getElementById('statusTitulo').textContent = 'Processando pagamento...';
+            document.getElementById('statusMsg').textContent = metodo === 'pix'
+                ? 'Aguardando confirmação do PIX'
+                : 'Comunicando com a operadora';
+            document.getElementById('statusBtn').style.display = 'none';
+
+            try {
+                const resultado = await apiPagamento({
+                    valor,
+                    metodo: metodo === 'pix' ? 'pix' : (metodo === 'credito' ? 'credit_card' : 'debit_card'),
+                    vaga: vaga.numero,
+                    placa: vaga.placa
+                });
+
+                // Sucesso
+                document.getElementById('statusSpinner').style.display = 'none';
+                statusEl.classList.add('sucesso');
+                document.getElementById('statusIcone').textContent = '✅';
+                document.getElementById('statusTitulo').textContent = 'Pagamento aprovado!';
+                document.getElementById('statusMsg').textContent = `ID: ${resultado.id}\nValor: R$ ${valor.toFixed(2)}`;
+                document.getElementById('statusBtn').style.display = 'block';
+                document.getElementById('statusBtn').textContent = 'Concluir e liberar vaga';
+
+                // Libera a vaga
+                finalizarSaida(vaga, minutos, valor, resultado);
+
+            } catch (err) {
+                document.getElementById('statusSpinner').style.display = 'none';
+                statusEl.classList.add('erro');
+                document.getElementById('statusIcone').textContent = '❌';
+                document.getElementById('statusTitulo').textContent = 'Pagamento falhou';
+                document.getElementById('statusMsg').textContent = err.message || 'Erro desconhecido';
+                document.getElementById('statusBtn').style.display = 'block';
+                document.getElementById('statusBtn').textContent = 'Tentar novamente';
+                document.getElementById('statusBtn').onclick = () => {
+                    // Volta para o formulário
+                    document.getElementById('pagamentoConteudo').style.display = 'block';
+                    statusEl.classList.remove('show', 'erro');
+                    document.getElementById('statusBtn').onclick = fecharModalPagamento;
+                };
+            }
+        }
+
+        function finalizarSaida(vaga, minutos, valor, pagamentoInfo) {
+            receita += valor;
+            saidasHoje++;
+
+            movimentacao.unshift({
+                horario: formatarHora(new Date()),
+                tipo: 'saida',
+                vaga: vaga.numero,
+                placa: vaga.placa,
+                veiculo: vaga.tipo,
+                tempo: formatarTempo(minutos),
+                valor: valor,
+                pagamentoId: pagamentoInfo ? pagamentoInfo.id : null,
+                metodoPagamento: pagamentoInfo ? pagamentoInfo.payment_method_id : null
+            });
+
+            vaga.ocupada = false;
+            vaga.placa = null;
+            vaga.tipo = null;
+            vaga.horarioEntrada = null;
+
+            renderizar();
+            toast(`Saída registrada! ${valor > 0 ? 'Pago R$ ' + valor.toFixed(2) : 'Sem cobrança'}`);
+        }
+
+        function buscarPlaca() {
+            const placa = document.getElementById('buscaPlaca').value.trim().toUpperCase();
+            const res = document.getElementById('buscaResultado');
+            if (!placa) return;
+
+            const vaga = vagas.find(v => v.ocupada && v.placa === placa);
+            if (vaga) {
+                const min = Math.floor((Date.now() - new Date(vaga.horarioEntrada)) / 60000);
+                res.className = 'busca-resultado ok';
+                res.innerHTML = `
+                    ✅ Encontrado!<br>
+                    <strong>Vaga:</strong> ${vaga.numero} (Andar ${vaga.andar})<br>
+                    <strong>Veículo:</strong> ${vaga.tipo}<br>
+                    <strong>Tempo:</strong> ${formatarTempo(min)}<br>
+                    <strong>Valor atual:</strong> R$ ${calcularPreco(vaga.tipo, min).toFixed(0)}
+                `;
+                // Destaca a vaga
+                andarAtual = vaga.andar;
+                document.querySelectorAll('.andar-btn').forEach(b => {
+                    b.classList.toggle('active', parseInt(b.dataset.andar) === andarAtual);
+                });
+                filtroAtual = 'todos';
+                document.querySelectorAll('.filtro-btn').forEach(b => b.classList.remove('active'));
+                document.querySelector('[data-filtro="todos"]').classList.add('active');
+                renderizarVagas();
+            } else {
+                res.className = 'busca-resultado fail';
+                res.innerHTML = '❌ Placa não encontrada no estacionamento';
+            }
+        }
+
+        function liberarTodas() {
+            if (!confirm('Tem certeza que deseja liberar TODAS as vagas?')) return;
+            vagas.forEach(v => {
+                if (v.ocupada) {
+                    const min = Math.floor((Date.now() - new Date(v.horarioEntrada)) / 60000);
+                    const valor = calcularPreco(v.tipo, min);
+                    receita += valor;
+                    saidasHoje++;
+                    movimentacao.unshift({
+                        horario: formatarHora(new Date()),
+                        tipo: 'saida',
+                        vaga: v.numero,
+                        placa: v.placa,
+                        veiculo: v.tipo,
+                        tempo: formatarTempo(min),
+                        valor: valor
+                    });
+                }
+                v.ocupada = false;
+                v.placa = null;
+                v.tipo = null;
+                v.horarioEntrada = null;
+            });
+            renderizar();
+            toast('Todas as vagas foram liberadas');
+        }
+
+        function simularOcupacao() {
+            const livres = vagas.filter(v => !v.ocupada);
+            if (!livres.length) return toast('Estacionamento lotado!', true);
+
+            const qtd = Math.min(5, livres.length);
+            for (let i = 0; i < qtd; i++) {
+                const idx = Math.floor(Math.random() * livres.length);
+                const vaga = livres.splice(idx, 1)[0];
+                const tipos = vaga.motoOnly ? ['Moto'] : ['Carro', 'SUV', 'Moto', 'Caminhonete', 'Van'];
+                const tipo = tipos[Math.floor(Math.random() * tipos.length)];
+                vaga.ocupada = true;
+                vaga.placa = gerarPlaca();
+                vaga.tipo = tipo;
+                vaga.horarioEntrada = new Date(Date.now() - Math.random() * 3 * 3600000); // até 3h atrás
+                entradasHoje++;
+                movimentacao.unshift({
+                    horario: formatarHora(vaga.horarioEntrada),
+                    tipo: 'entrada',
+                    vaga: vaga.numero,
+                    placa: vaga.placa,
+                    veiculo: tipo,
+                    tempo: null,
+                    valor: 0
+                });
+            }
+            renderizar();
+            toast(`${qtd} veículos simulados com sucesso`);
+        }
+
+        function exportarRelatorio() {
+            let txt = '=== RELATÓRIO ESTACIONAMENTO NEO ===\n';
+            txt += `Data: ${new Date().toLocaleString('pt-BR')}\n`;
+            txt += `Vagas totais: ${vagas.length} | Livres: ${vagas.filter(v => !v.ocupada).length} | Ocupadas: ${vagas.filter(v => v.ocupada).length}\n`;
+            txt += `Entradas: ${entradasHoje} | Saídas: ${saidasHoje} | Receita: R$ ${receita.toFixed(2)}\n\n`;
+            txt += '--- MOVIMENTAÇÃO ---\n';
+            movimentacao.forEach(m => {
+                txt += `${m.horario} | ${m.tipo.toUpperCase()} | Vaga ${m.vaga} | ${m.placa} | ${m.veiculo} | ${m.tempo || '-'} | R$ ${m.valor}\n`;
+            });
+            const blob = new Blob([txt], { type: 'text/plain' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `relatorio-estacionamento-${Date.now()}.txt`;
+            a.click();
+            toast('Relatório exportado!');
+        }
+
+        function limparForm() {
+            document.getElementById('placa').value = '';
+            document.getElementById('tipoVeiculo').value = 'Carro';
+        }
+
+        // ===== UTILITÁRIOS =====
+        function calcularPreco(tipo, minutos) {
+            if (minutos <= TOLERANCIA_MIN) return 0;
+            const horas = Math.ceil(minutos / 60);
+            return Math.max(1, horas) * (PRECOS[tipo] || 8);
+        }
+
+        function formatarHora(data) {
+            return new Date(data).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        }
+
+        function formatarTempo(min) {
+            if (min < 60) return `${min}min`;
+            const h = Math.floor(min / 60);
+            const m = min % 60;
+            return `${h}h ${m}min`;
+        }
+
+        function iconeVeiculo(tipo) {
+            const map = { 'Carro': '🚗', 'Moto': '🏍️', 'SUV': '🚙', 'Caminhonete': '🛻', 'Van': '🚐' };
+            return map[tipo] || '🚗';
+        }
+
+        function gerarPlaca() {
+            const L = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            const N = '0123456789';
+            return L[rand(26)] + L[rand(26)] + L[rand(26)] + N[rand(10)] + L[rand(26)] + N[rand(10)] + N[rand(10)];
+        }
+
+        function rand(n) { return Math.floor(Math.random() * n); }
+
+        function toast(msg, erro = false) {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.style.borderColor = erro ? 'var(--red)' : 'var(--cyan)';
+            t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 3000);
+        }
+
+        function salvar() {
+            localStorage.setItem('estacionamentoNeo', JSON.stringify({
+                vagas, movimentacao, entradasHoje, saidasHoje, receita
+            }));
+        }
+
+        // Máscaras de cartão
+        document.getElementById('cardNumber')?.addEventListener('input', function (e) {
+            let v = e.target.value.replace(/\D/g, '').substring(0, 16);
+            e.target.value = v.replace(/(\d{4})(?=\d)/g, '$1 ');
+        });
+
+        document.getElementById('cardExpiry')?.addEventListener('input', function (e) {
+            let v = e.target.value.replace(/\D/g, '').substring(0, 4);
+            if (v.length >= 3) v = v.substring(0, 2) + '/' + v.substring(2);
+            e.target.value = v;
+        });
+
+        document.getElementById('cardCvv')?.addEventListener('input', function (e) {
+            e.target.value = e.target.value.replace(/\D/g, '').substring(0, 4);
+        });
+
+        // Fechar modal com ESC
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape') fecharModalPagamento();
+        });
+
+        // Clique fora do modal
+        document.getElementById('modalPagamento')?.addEventListener('click', function (e) {
+            if (e.target === this) fecharModalPagamento();
+        });
+
+        // Start
+        iniciar();
+    </script>
+</body>
+
+</html>
